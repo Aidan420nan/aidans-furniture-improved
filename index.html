@@ -1,0 +1,366 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Aidan's Furniture | Built for Canadian Homes</title>
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='16' fill='%231f4a3b'/%3E%3Cpath d='M16 35h32v12H16zM20 25h24a6 6 0 0 1 6 6v4H14v-4a6 6 0 0 1 6-6zM20 47v5M44 47v5' fill='none' stroke='%23f6f0e7' stroke-width='4' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E">
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Playfair+Display:wght@600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+  <style>
+    :root {
+      --cream: #f6f0e7;
+      --linen: #fbf8f2;
+      --clay: #b77b55;
+      --walnut: #5b3f2e;
+      --forest: #1f4a3b;
+      --moss: #6c7b55;
+      --ink: #2c2722;
+    }
+    * { box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+    body {
+      margin: 0;
+      color: var(--ink);
+      background: var(--linen);
+      font-family: Inter, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    }
+    h1, h2, h3, .display { font-family: "Playfair Display", Georgia, serif; }
+    .nav-link { position: relative; }
+    .nav-link::after {
+      content: "";
+      position: absolute;
+      left: 0;
+      bottom: -6px;
+      width: 0;
+      height: 2px;
+      background: var(--forest);
+      transition: width .25s ease;
+    }
+    .nav-link:hover::after { width: 100%; }
+    .hero {
+      background-image:
+        linear-gradient(90deg, rgba(36, 30, 23, .72), rgba(36, 30, 23, .34), rgba(36, 30, 23, .08)),
+        url("https://images.unsplash.com/photo-1600607687920-4e2a09cf159d?auto=format&fit=crop&w=1800&q=82");
+      background-size: cover;
+      background-position: center;
+    }
+    .soft-shadow { box-shadow: 0 18px 50px rgba(52, 38, 27, .12); }
+    .product-card { transition: transform .25s ease, box-shadow .25s ease; }
+    .product-card:hover { transform: translateY(-5px); box-shadow: 0 20px 45px rgba(52, 38, 27, .14); }
+    .image-zoom img { transition: transform .55s ease; }
+    .image-zoom:hover img { transform: scale(1.05); }
+    .category-card { min-height: 360px; }
+    .toast {
+      opacity: 0;
+      transform: translateY(16px);
+      pointer-events: none;
+      transition: opacity .25s ease, transform .25s ease;
+    }
+    .toast.show { opacity: 1; transform: translateY(0); }
+    .modal { display: none; }
+    .modal.open { display: flex; }
+    @media (max-width: 767px) {
+      .hero { background-position: 58% center; }
+      .category-card { min-height: 270px; }
+    }
+  </style>
+</head>
+<body>
+  <header class="sticky top-0 z-40 border-b border-[#eadfce] bg-[#fbf8f2]/95 backdrop-blur">
+    <div class="mx-auto flex max-w-7xl items-center justify-between px-5 py-4 lg:px-8">
+      <a href="#top" class="flex items-center gap-3 text-[#1f4a3b]">
+        <span class="grid h-10 w-10 place-items-center rounded-full bg-[#e8dcc8] text-lg"><i class="fa-solid fa-couch"></i></span>
+        <span class="display text-2xl font-bold">Aidan's</span>
+      </a>
+      <nav class="hidden items-center gap-7 text-sm font-semibold text-[#5b3f2e] lg:flex">
+        <a class="nav-link" href="#best-sellers">Shop All</a>
+        <a class="nav-link" href="#living">Living</a>
+        <a class="nav-link" href="#bedroom">Bedroom</a>
+        <a class="nav-link" href="#dining">Dining</a>
+        <a class="nav-link" href="#storage">Storage</a>
+        <a class="nav-link" href="#decor">Decor</a>
+      </nav>
+      <div class="flex items-center gap-2">
+        <button id="searchOpen" class="grid h-10 w-10 place-items-center rounded-full text-[#5b3f2e] hover:bg-[#efe6d8]" aria-label="Open search"><i class="fa-solid fa-magnifying-glass"></i></button>
+        <button class="hidden h-10 w-10 place-items-center rounded-full text-[#5b3f2e] hover:bg-[#efe6d8] sm:grid" aria-label="Account"><i class="fa-regular fa-user"></i></button>
+        <button class="relative grid h-10 w-10 place-items-center rounded-full text-[#5b3f2e] hover:bg-[#efe6d8]" aria-label="Cart">
+          <i class="fa-solid fa-bag-shopping"></i>
+          <span id="cartCount" class="absolute -right-1 -top-1 grid h-5 min-w-5 place-items-center rounded-full bg-[#1f4a3b] px-1 text-xs font-bold text-white">0</span>
+        </button>
+        <button id="menuToggle" class="grid h-10 w-10 place-items-center rounded-full text-[#5b3f2e] hover:bg-[#efe6d8] lg:hidden" aria-label="Menu"><i class="fa-solid fa-bars"></i></button>
+      </div>
+    </div>
+    <nav id="mobileMenu" class="hidden border-t border-[#eadfce] px-5 py-4 text-sm font-semibold text-[#5b3f2e] lg:hidden">
+      <div class="grid gap-3">
+        <a href="#best-sellers">Shop All</a><a href="#living">Living</a><a href="#bedroom">Bedroom</a><a href="#dining">Dining</a><a href="#storage">Storage</a><a href="#decor">Decor</a>
+      </div>
+    </nav>
+  </header>
+
+  <main id="top">
+    <section class="hero min-h-[720px] px-5 text-white md:min-h-[760px]">
+      <div class="mx-auto flex min-h-[720px] max-w-7xl items-center py-24 md:min-h-[760px] lg:px-8">
+        <div class="max-w-2xl">
+          <p class="mb-5 text-sm font-bold uppercase tracking-[.25em] text-[#e8dcc8]">Furniture for real Canadian living</p>
+          <h1 class="text-5xl font-bold leading-tight md:text-7xl">Rooms that feel ready for snow days, Sunday dinners, and everyone in between.</h1>
+          <p class="mt-6 max-w-xl text-lg leading-8 text-[#f4eadc]">Aidan's brings together warm woods, soft performance fabrics, and practical storage for homes that work hard through every season.</p>
+          <a href="#best-sellers" class="mt-9 inline-flex items-center gap-3 rounded-full bg-[#f6f0e7] px-7 py-4 font-bold text-[#1f4a3b] transition hover:bg-white">
+            Shop comfortable favourites <i class="fa-solid fa-arrow-right"></i>
+          </a>
+        </div>
+      </div>
+    </section>
+
+    <section id="best-sellers" class="mx-auto max-w-7xl px-5 py-20 lg:px-8">
+      <div class="mb-10 flex flex-col justify-between gap-4 md:flex-row md:items-end">
+        <div>
+          <p class="font-bold uppercase tracking-[.2em] text-[#6c7b55]">Best sellers</p>
+          <h2 class="mt-3 text-4xl font-bold text-[#2c2722] md:text-5xl">Pieces families keep choosing</h2>
+        </div>
+        <p class="max-w-md text-[#6d6258]">Balanced proportions, resilient fabrics, and finishes that make a home feel settled the moment they arrive.</p>
+      </div>
+      <div id="bestSellerGrid" class="grid gap-6 sm:grid-cols-2 lg:grid-cols-4"></div>
+    </section>
+
+    <section class="bg-[#f0e6d7] py-20">
+      <div class="mx-auto max-w-7xl px-5 lg:px-8">
+        <div class="max-w-2xl">
+          <p class="font-bold uppercase tracking-[.2em] text-[#6c7b55]">Shop by category</p>
+          <h2 class="mt-3 text-4xl font-bold md:text-5xl">Start with the room, then find the feeling.</h2>
+        </div>
+        <div class="mt-12 grid gap-6 lg:grid-cols-12">
+          <a id="living" href="#best-sellers" class="category-card image-zoom relative overflow-hidden rounded-lg lg:col-span-7">
+            <img class="h-full w-full object-cover" src="https://images.unsplash.com/photo-1616486338812-3dadae4b4ace?auto=format&fit=crop&w=1200&q=82" alt="Warm living room with sectional sofa">
+            <div class="absolute inset-0 bg-gradient-to-t from-black/65 to-transparent"></div>
+            <div class="absolute bottom-0 p-7 text-white"><h3 class="text-3xl font-bold">Living Room</h3><p class="mt-2 max-w-md">Deep seats, durable fabrics, and layouts made for long winter evenings.</p></div>
+          </a>
+          <a id="bedroom" href="#new-arrivals" class="category-card image-zoom relative overflow-hidden rounded-lg lg:col-span-5 lg:translate-y-10">
+            <img class="h-full w-full object-cover" src="https://images.unsplash.com/photo-1616594039964-ae9021a400a0?auto=format&fit=crop&w=1100&q=82" alt="Soft neutral bedroom">
+            <div class="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent"></div>
+            <div class="absolute bottom-0 p-7 text-white"><h3 class="text-3xl font-bold">Bedroom</h3><p class="mt-2">Storage beds and quiet finishes for calmer mornings.</p></div>
+          </a>
+          <a id="dining" href="#new-arrivals" class="category-card image-zoom relative overflow-hidden rounded-lg lg:col-span-5">
+            <img class="h-full w-full object-cover" src="https://images.unsplash.com/photo-1604578762246-41134e37f9cc?auto=format&fit=crop&w=1100&q=82" alt="Wood dining table in a family home">
+            <div class="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent"></div>
+            <div class="absolute bottom-0 p-7 text-white"><h3 class="text-3xl font-bold">Dining</h3><p class="mt-2">Tables and benches built for weeknight meals and full houses.</p></div>
+          </a>
+          <a id="storage" href="#new-arrivals" class="category-card image-zoom relative overflow-hidden rounded-lg lg:col-span-4 lg:translate-y-10">
+            <img class="h-full w-full object-cover" src="https://images.unsplash.com/photo-1594026112284-02bb6f3352fe?auto=format&fit=crop&w=1000&q=82" alt="Wood storage cabinet">
+            <div class="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent"></div>
+            <div class="absolute bottom-0 p-7 text-white"><h3 class="text-3xl font-bold">Storage</h3><p class="mt-2">Entry, media, and dining storage that keeps busy homes easy to live in.</p></div>
+          </a>
+          <a id="decor" href="#new-arrivals" class="category-card image-zoom relative overflow-hidden rounded-lg lg:col-span-3">
+            <img class="h-full w-full object-cover" src="https://images.unsplash.com/photo-1513506003901-1e6a229e2d15?auto=format&fit=crop&w=900&q=82" alt="Warm lamp and home accents">
+            <div class="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent"></div>
+            <div class="absolute bottom-0 p-7 text-white"><h3 class="text-3xl font-bold">Decor</h3><p class="mt-2">Soft finishing pieces with useful purpose.</p></div>
+          </a>
+        </div>
+      </div>
+    </section>
+
+    <section id="new-arrivals" class="mx-auto max-w-7xl px-5 py-20 lg:px-8">
+      <div class="mb-10 flex flex-col justify-between gap-4 md:flex-row md:items-end">
+        <div>
+          <p class="font-bold uppercase tracking-[.2em] text-[#6c7b55]">New arrivals</p>
+          <h2 class="mt-3 text-4xl font-bold md:text-5xl">Fresh pieces with staying power</h2>
+        </div>
+        <p class="max-w-md text-[#6d6258]">New silhouettes, practical storage, and easy-care textures selected for Canadian family homes.</p>
+      </div>
+      <div id="arrivalGrid" class="grid gap-6 sm:grid-cols-2 lg:grid-cols-4"></div>
+    </section>
+
+    <section class="bg-[#1f4a3b] px-5 py-20 text-white">
+      <div class="mx-auto grid max-w-7xl gap-10 lg:grid-cols-[1fr_1.2fr] lg:px-8">
+        <div>
+          <p class="font-bold uppercase tracking-[.2em] text-[#d9c9ae]">Why Aidan's</p>
+          <h2 class="mt-3 text-4xl font-bold md:text-5xl">Thoughtful furniture for homes that actually get lived in.</h2>
+        </div>
+        <div class="grid gap-5 sm:grid-cols-3">
+          <article class="rounded-lg bg-white/10 p-6"><i class="fa-solid fa-hammer mb-5 text-2xl text-[#d9c9ae]"></i><h3 class="text-xl font-bold">Built with care</h3><p class="mt-3 text-sm leading-6 text-[#e7eee8]">Sturdy frames, grounded finishes, and fabrics chosen for daily use.</p></article>
+          <article class="rounded-lg bg-white/10 p-6"><i class="fa-solid fa-truck-fast mb-5 text-2xl text-[#d9c9ae]"></i><h3 class="text-xl font-bold">Winter-aware delivery</h3><p class="mt-3 text-sm leading-6 text-[#e7eee8]">Clear scheduling and careful handling when weather makes delivery matter more.</p></article>
+          <article class="rounded-lg bg-white/10 p-6"><i class="fa-solid fa-people-roof mb-5 text-2xl text-[#d9c9ae]"></i><h3 class="text-xl font-bold">Family comfort</h3><p class="mt-3 text-sm leading-6 text-[#e7eee8]">Roomy seating, useful storage, and pieces that welcome guests naturally.</p></article>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer class="bg-[#2c2722] px-5 py-14 text-[#efe6d8]">
+    <div class="mx-auto grid max-w-7xl gap-10 md:grid-cols-4 lg:px-8">
+      <div>
+        <div class="display text-3xl font-bold">Aidan's</div>
+        <p class="mt-4 text-sm leading-6 text-[#cfc3b5]">Warm, practical furniture for Canadian homes and the people who gather in them.</p>
+      </div>
+      <div><h3 class="font-bold">Shop</h3><div class="mt-4 grid gap-2 text-sm text-[#cfc3b5]"><a href="#living">Living</a><a href="#bedroom">Bedroom</a><a href="#dining">Dining</a><a href="#decor">Decor</a></div></div>
+      <div><h3 class="font-bold">Support</h3><div class="mt-4 grid gap-2 text-sm text-[#cfc3b5]"><a href="#">Delivery</a><a href="#">Returns</a><a href="#">Care guide</a><a href="#">Contact</a></div></div>
+      <div>
+        <h3 class="font-bold">Stay in touch</h3>
+        <div class="mt-4 flex overflow-hidden rounded-full bg-white">
+          <input class="min-w-0 flex-1 px-4 py-3 text-sm text-[#2c2722] outline-none" placeholder="Email address" aria-label="Email address">
+          <button class="bg-[#b77b55] px-4 font-bold text-white" aria-label="Subscribe"><i class="fa-solid fa-arrow-right"></i></button>
+        </div>
+        <div class="mt-5 flex gap-4 text-xl"><i class="fa-brands fa-instagram"></i><i class="fa-brands fa-facebook"></i><i class="fa-brands fa-pinterest"></i></div>
+      </div>
+    </div>
+  </footer>
+
+  <div id="searchModal" class="modal fixed inset-0 z-50 items-start justify-center bg-black/55 px-5 py-10">
+    <div class="max-h-[86vh] w-full max-w-3xl overflow-hidden rounded-lg bg-[#fbf8f2] soft-shadow">
+      <div class="flex items-center gap-3 border-b border-[#eadfce] p-5">
+        <i class="fa-solid fa-magnifying-glass text-[#6c7b55]"></i>
+        <input id="searchInput" class="flex-1 bg-transparent text-lg outline-none" placeholder="Search sofas, storage beds, dining tables..." aria-label="Search products">
+        <button id="searchClose" class="grid h-9 w-9 place-items-center rounded-full hover:bg-[#efe6d8]" aria-label="Close search"><i class="fa-solid fa-xmark"></i></button>
+      </div>
+      <div id="searchResults" class="grid max-h-[65vh] gap-3 overflow-auto p-5"></div>
+    </div>
+  </div>
+
+  <div id="toast" class="toast fixed bottom-6 left-1/2 z-50 -translate-x-1/2 rounded-full bg-[#1f4a3b] px-5 py-3 text-sm font-bold text-white shadow-2xl">
+    Added to cart
+  </div>
+
+  <script>
+    const products = [
+      {name:"Lakeshore Modular Sectional", category:"Living Room", price:1899, image:"https://images.unsplash.com/photo-1555041469-a586c61ea9bc?auto=format&fit=crop&w=900&q=82", description:"A roomy modular sectional in soft oatmeal fabric for movie nights, guests, and stretched-out winter weekends.", tags:"sectional sofa living family"},
+      {name:"Fernwood Performance Sofa", category:"Living Room", price:1249, image:"https://images.unsplash.com/photo-1550254478-ead40cc54513?auto=format&fit=crop&w=900&q=82", description:"A clean-lined sofa with forgiving performance upholstery and warm wood legs.", tags:"sofa living performance fabric"},
+      {name:"Cabin Hearth Reversible Chaise Sofa", category:"Living Room", price:1599, image:"https://images.unsplash.com/photo-1493663284031-b7e3aefcae8e?auto=format&fit=crop&w=900&q=82", description:"A practical chaise sofa that flips to suit apartments, dens, and growing rooms.", tags:"chaise sofa reversible"},
+      {name:"Oakridge Slipcovered Sofa", category:"Living Room", price:1389, image:"https://images.unsplash.com/photo-1600210492486-724fe5c67fb0?auto=format&fit=crop&w=900&q=82", description:"Relaxed slipcovered comfort with a tailored shape that still feels polished.", tags:"sofa slipcovered oakridge"},
+      {name:"Muskoka Deep Seat Chair", category:"Living Room", price:749, image:"https://images.unsplash.com/photo-1598300042247-d088f8ab3a91?auto=format&fit=crop&w=900&q=82", description:"A generous lounge chair made for reading, fireside coffee, and quiet corners.", tags:"chair accent lounge"},
+      {name:"West Coast Boucle Accent Chair", category:"Living Room", price:629, image:"https://images.unsplash.com/photo-1501045661006-fcebe0257c3f?auto=format&fit=crop&w=900&q=82", description:"Soft boucle texture with a compact footprint and gently curved arms.", tags:"chair boucle accent"},
+      {name:"Harbourview Leather-Look Recliner", category:"Living Room", price:899, image:"https://images.unsplash.com/photo-1567538096630-e0c55bd6374c?auto=format&fit=crop&w=900&q=82", description:"A handsome recliner with supportive cushioning and an easy-clean leather-look finish.", tags:"recliner chair leather"},
+      {name:"Cedarvale Apartment Sofa", category:"Living Room", price:1049, image:"https://images.unsplash.com/photo-1540574163026-643ea20ade25?auto=format&fit=crop&w=900&q=82", description:"A smaller-scale sofa with full comfort for condos, basements, and first homes.", tags:"apartment sofa"},
+      {name:"Ridgeway Corner Sectional", category:"Living Room", price:2249, image:"https://images.unsplash.com/photo-1600607688969-a5bfcd646154?auto=format&fit=crop&w=900&q=82", description:"A family-size corner sectional with broad arms and sink-in cushions.", tags:"sectional corner living"},
+      {name:"Maple Glen Loveseat", category:"Living Room", price:899, image:"https://images.unsplash.com/photo-1616627547584-bf28cee262db?auto=format&fit=crop&w=900&q=82", description:"A warm neutral loveseat for small living rooms, bedrooms, and reading spaces.", tags:"loveseat sofa"},
+      {name:"Juniper Swivel Chair", category:"Living Room", price:689, image:"https://images.unsplash.com/photo-1586023492125-27b2c045efd7?auto=format&fit=crop&w=900&q=82", description:"A smooth swivel chair that keeps conversation, TV, and window views within reach.", tags:"swivel chair"},
+      {name:"Willow Creek Sofa Bed", category:"Living Room", price:1299, image:"https://images.unsplash.com/photo-1618220179428-22790b461013?auto=format&fit=crop&w=900&q=82", description:"A guest-ready sofa bed with a simple silhouette and supportive seat.", tags:"sofa bed sleeper"},
+      {name:"North Shore Family Sectional", category:"Living Room", price:2099, image:"https://images.unsplash.com/photo-1600607687939-ce8a6c25118c?auto=format&fit=crop&w=900&q=82", description:"Deep, durable seating designed for big blankets, kids, pets, and company.", tags:"sectional family"},
+      {name:"Birch Trail Accent Chair", category:"Living Room", price:579, image:"https://images.unsplash.com/photo-1567016376408-0226e4d0c1ea?auto=format&fit=crop&w=900&q=82", description:"A light wood accent chair with soft upholstery and a crisp Canadian cottage feel.", tags:"accent chair wood"},
+      {name:"Evergreen Lounge Chair", category:"Living Room", price:719, image:"https://images.unsplash.com/photo-1519947486511-46149fa0a254?auto=format&fit=crop&w=900&q=82", description:"A deep green lounge chair that adds comfort and grounded colour.", tags:"green lounge chair"},
+      {name:"Whistler Storage Bed", category:"Bedroom", price:1199, image:"https://images.unsplash.com/photo-1505693416388-ac5ce068fe85?auto=format&fit=crop&w=900&q=82", description:"A warm wood storage bed with practical drawers for extra linens and off-season layers.", tags:"storage bed bedroom"},
+      {name:"Saanich Oak Six-Drawer Dresser", category:"Bedroom", price:1049, image:"https://images.unsplash.com/photo-1618221195710-dd6b41faaea6?auto=format&fit=crop&w=900&q=82", description:"A wide oak dresser with smooth drawers and a calm, natural finish.", tags:"dresser oak bedroom"},
+      {name:"Hudson Bay Nightstand", category:"Bedroom", price:329, image:"https://images.unsplash.com/photo-1615874694520-474822394e73?auto=format&fit=crop&w=900&q=82", description:"A compact nightstand with closed storage and a sturdy top for evening essentials.", tags:"nightstand bedroom"},
+      {name:"Elora Upholstered Storage Bed", category:"Bedroom", price:1349, image:"https://images.unsplash.com/photo-1617325247661-675ab4b64ae2?auto=format&fit=crop&w=900&q=82", description:"Soft upholstery meets hidden storage for a bedroom that feels restful and organized.", tags:"upholstered storage bed"},
+      {name:"Kootenay Tall Chest", category:"Bedroom", price:899, image:"https://images.unsplash.com/photo-1595428774223-ef52624120d2?auto=format&fit=crop&w=900&q=82", description:"A tall chest that saves floor space while holding everyday layers with ease.", tags:"tall chest dresser"},
+      {name:"Briarwood Panel Bed", category:"Bedroom", price:979, image:"https://images.unsplash.com/photo-1560448204-e02f11c3d0e2?auto=format&fit=crop&w=900&q=82", description:"A timeless panel bed in a warm wood tone that pairs with nearly any room.", tags:"panel bed wood"},
+      {name:"Nanaimo Two-Drawer Nightstand", category:"Bedroom", price:289, image:"https://images.unsplash.com/photo-1600210491369-e753d80a41f3?auto=format&fit=crop&w=900&q=82", description:"Two easy drawers and a softened profile for relaxed bedside storage.", tags:"nightstand drawer"},
+      {name:"Laurentian Wide Dresser", category:"Bedroom", price:1189, image:"https://images.unsplash.com/photo-1595526114035-0d45ed16cfbf?auto=format&fit=crop&w=900&q=82", description:"A substantial dresser with quiet lines, roomy drawers, and a walnut-inspired finish.", tags:"wide dresser"},
+      {name:"Crescent Linen Headboard Bed", category:"Bedroom", price:849, image:"https://images.unsplash.com/photo-1616486029423-aaa4789e8c9a?auto=format&fit=crop&w=900&q=82", description:"A linen-look bed with gentle curves and an inviting, hotel-at-home feel.", tags:"linen bed upholstered"},
+      {name:"Algonquin Blanket Chest", category:"Bedroom", price:499, image:"https://images.unsplash.com/photo-1618221118493-9cfa1a1c00da?auto=format&fit=crop&w=900&q=82", description:"A handsome blanket chest for bedding, toys, or seasonal storage at the foot of the bed.", tags:"blanket chest storage"},
+      {name:"Prairie Harvest Dining Table", category:"Dining/Storage", price:1099, image:"https://images.unsplash.com/photo-1617806118233-18e1de247200?auto=format&fit=crop&w=900&q=82", description:"A generous wood dining table with a welcoming grain and everyday durability.", tags:"dining table wood"},
+      {name:"Granville Bench Set", category:"Dining/Storage", price:749, image:"https://images.unsplash.com/photo-1604578762246-41134e37f9cc?auto=format&fit=crop&w=900&q=82", description:"A table-and-bench set that makes squeezing in one more guest feel easy.", tags:"dining bench set"},
+      {name:"Kingston Round Dining Table", category:"Dining/Storage", price:879, image:"https://images.unsplash.com/photo-1524758631624-e2822e304c36?auto=format&fit=crop&w=900&q=82", description:"A round table that keeps conversation close in kitchens and smaller dining rooms.", tags:"round dining table"},
+      {name:"Trestlewood Sideboard", category:"Dining/Storage", price:1149, image:"https://images.unsplash.com/photo-1594026112284-02bb6f3352fe?auto=format&fit=crop&w=900&q=82", description:"A sturdy sideboard for serving pieces, board games, and the good table linens.", tags:"sideboard storage"},
+      {name:"Elm Street Entry Console", category:"Dining/Storage", price:529, image:"https://images.unsplash.com/photo-1600566753190-17f0baa2a6c3?auto=format&fit=crop&w=900&q=82", description:"A slim console that creates a proper landing place for keys, mail, and mitts.", tags:"console entry storage"},
+      {name:"Bow River Storage Bench", category:"Dining/Storage", price:449, image:"https://images.unsplash.com/photo-1618220179428-22790b461013?auto=format&fit=crop&w=900&q=82", description:"A cushioned bench with hidden storage for busy entries and mudrooms.", tags:"storage bench"},
+      {name:"Cedar Point Dining Bench", category:"Dining/Storage", price:399, image:"https://images.unsplash.com/photo-1617806118233-18e1de247200?auto=format&fit=crop&w=900&q=82", description:"A simple wood bench that adds flexible seating around the table.", tags:"dining bench"},
+      {name:"Maritime Glass Door Cabinet", category:"Dining/Storage", price:999, image:"https://images.unsplash.com/photo-1616627561839-074385245ff6?auto=format&fit=crop&w=900&q=82", description:"A glass-door cabinet for dishes, books, and keepsakes without visual clutter.", tags:"cabinet storage glass"},
+      {name:"Pacific Low Media Unit", category:"Accent/Decor", price:849, image:"https://images.unsplash.com/photo-1618221195710-dd6b41faaea6?auto=format&fit=crop&w=900&q=82", description:"A low media unit with warm wood storage and a calm profile for living rooms.", tags:"media unit storage"},
+      {name:"Hearthstone Storage Ottoman", category:"Accent/Decor", price:399, image:"https://images.unsplash.com/photo-1598300042247-d088f8ab3a91?auto=format&fit=crop&w=900&q=82", description:"A soft ottoman with hidden storage for blankets, toys, and remotes.", tags:"ottoman storage"},
+      {name:"Aurora Arc Floor Lamp", category:"Accent/Decor", price:289, image:"https://images.unsplash.com/photo-1513506003901-1e6a229e2d15?auto=format&fit=crop&w=900&q=82", description:"A warm arc lamp that adds evening glow beside sectionals and reading chairs.", tags:"lamp lighting decor"},
+      {name:"Raincoast Round Coffee Table", category:"Accent/Decor", price:549, image:"https://images.unsplash.com/photo-1532372320572-cda25653a694?auto=format&fit=crop&w=900&q=82", description:"A round coffee table with softened edges and a practical lower shelf.", tags:"coffee table"},
+      {name:"Maple Frame Wall Mirror", category:"Accent/Decor", price:349, image:"https://images.unsplash.com/photo-1618220252344-8ec99ec624b1?auto=format&fit=crop&w=900&q=82", description:"A maple-framed mirror that brightens entries, bedrooms, and narrow halls.", tags:"mirror decor"},
+      {name:"Cottage Nesting Tables", category:"Accent/Decor", price:329, image:"https://images.unsplash.com/photo-1499933374294-4584851497cc?auto=format&fit=crop&w=900&q=82", description:"Flexible nesting tables that tuck away neatly when the room gets busy.", tags:"nesting tables"},
+      {name:"Softline Pouf Ottoman", category:"Accent/Decor", price:229, image:"https://images.unsplash.com/photo-1600489000022-c2086d79f9d4?auto=format&fit=crop&w=900&q=82", description:"A soft pouf for casual seating, tired feet, and kid-friendly corners.", tags:"pouf ottoman decor"}
+    ];
+
+    const originals = [
+      {name:"Aidan Classic Sofa", category:"Living Room", price:999, image:"https://images.unsplash.com/photo-1555041469-a586c61ea9bc?auto=format&fit=crop&w=900&q=82", description:"A familiar Aidan's favourite with supportive cushions and everyday scale.", tags:"original sofa"},
+      {name:"Warm Oak Dining Set", category:"Dining/Storage", price:1199, image:"https://images.unsplash.com/photo-1617806118233-18e1de247200?auto=format&fit=crop&w=900&q=82", description:"A dependable dining set with a natural finish and family-ready seating.", tags:"original dining"},
+      {name:"Neutral Storage Bed", category:"Bedroom", price:1099, image:"https://images.unsplash.com/photo-1505693416388-ac5ce068fe85?auto=format&fit=crop&w=900&q=82", description:"A storage-forward bed for tidy bedrooms and easy seasonal swaps.", tags:"original bed"}
+    ];
+
+    const allProducts = [...originals, ...products];
+    const bestSellers = [allProducts[0], products[0], products[1], products[15], products[28], products[36], products[8], products[24]];
+    const newArrivals = [products[2], products[5], products[16], products[19], products[30], products[34], products[37], products[39]];
+    let cartCount = 0;
+
+    function money(value) {
+      return new Intl.NumberFormat("en-CA", { style: "currency", currency: "CAD", maximumFractionDigits: 0 }).format(value);
+    }
+
+    function productCard(product) {
+      return `
+        <article class="product-card overflow-hidden rounded-lg bg-white">
+          <div class="image-zoom aspect-[4/3] overflow-hidden bg-[#eadfce]">
+            <img src="${product.image}" alt="${product.name}" class="h-full w-full object-cover" loading="lazy">
+          </div>
+          <div class="p-5">
+            <p class="text-xs font-bold uppercase tracking-[.18em] text-[#6c7b55]">${product.category}</p>
+            <h3 class="mt-2 min-h-[56px] text-xl font-bold leading-7">${product.name}</h3>
+            <p class="mt-2 min-h-[72px] text-sm leading-6 text-[#6d6258]">${product.description}</p>
+            <div class="mt-5 flex items-center justify-between gap-3">
+              <span class="text-lg font-bold text-[#5b3f2e]">${money(product.price)}</span>
+              <button class="addCart rounded-full bg-[#1f4a3b] px-4 py-2 text-sm font-bold text-white transition hover:bg-[#16372d]" data-name="${product.name}">Add to Cart</button>
+            </div>
+          </div>
+        </article>`;
+    }
+
+    function renderGrid(id, items) {
+      document.getElementById(id).innerHTML = items.map(productCard).join("");
+    }
+
+    function showToast(name) {
+      const toast = document.getElementById("toast");
+      toast.textContent = `${name} added to cart`;
+      toast.classList.add("show");
+      window.clearTimeout(showToast.timer);
+      showToast.timer = window.setTimeout(() => toast.classList.remove("show"), 1800);
+    }
+
+    function updateSearch(query = "") {
+      const q = query.trim().toLowerCase();
+      const results = q ? allProducts.filter(p => `${p.name} ${p.category} ${p.description} ${p.tags}`.toLowerCase().includes(q)) : allProducts.slice(0, 8);
+      document.getElementById("searchResults").innerHTML = results.length ? results.slice(0, 16).map(p => `
+        <button class="addCart flex gap-4 rounded-lg bg-white p-3 text-left transition hover:bg-[#f0e6d7]" data-name="${p.name}">
+          <img src="${p.image}" alt="" class="h-20 w-20 rounded-md object-cover">
+          <span class="min-w-0 flex-1">
+            <span class="block font-bold">${p.name}</span>
+            <span class="mt-1 block text-sm text-[#6d6258]">${p.category} · ${money(p.price)}</span>
+            <span class="mt-1 block text-sm text-[#6d6258]">${p.description}</span>
+          </span>
+        </button>`).join("") : `<p class="rounded-lg bg-white p-6 text-center text-[#6d6258]">No matches yet. Try sofa, storage, dining, or lamp.</p>`;
+    }
+
+    renderGrid("bestSellerGrid", bestSellers);
+    renderGrid("arrivalGrid", newArrivals);
+    updateSearch();
+
+    document.addEventListener("click", (event) => {
+      const cartButton = event.target.closest(".addCart");
+      if (cartButton) {
+        cartCount += 1;
+        document.getElementById("cartCount").textContent = cartCount;
+        showToast(cartButton.dataset.name);
+      }
+    });
+
+    document.getElementById("menuToggle").addEventListener("click", () => {
+      document.getElementById("mobileMenu").classList.toggle("hidden");
+    });
+    document.querySelectorAll("#mobileMenu a").forEach(link => link.addEventListener("click", () => {
+      document.getElementById("mobileMenu").classList.add("hidden");
+    }));
+
+    const searchModal = document.getElementById("searchModal");
+    const searchInput = document.getElementById("searchInput");
+    document.getElementById("searchOpen").addEventListener("click", () => {
+      searchModal.classList.add("open");
+      searchInput.value = "";
+      updateSearch();
+      setTimeout(() => searchInput.focus(), 50);
+    });
+    document.getElementById("searchClose").addEventListener("click", () => searchModal.classList.remove("open"));
+    searchModal.addEventListener("click", event => {
+      if (event.target === searchModal) searchModal.classList.remove("open");
+    });
+    searchInput.addEventListener("input", event => updateSearch(event.target.value));
+    document.addEventListener("keydown", event => {
+      if (event.key === "Escape") searchModal.classList.remove("open");
+    });
+  </script>
+</body>
+</html>
